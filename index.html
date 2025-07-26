@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Gastos - Firebase</title>
 
-  <!-- ✅ Manifesto e cor do tema -->
+  <!-- Manifesto e cor do tema -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4CAF50">
 
-  <!-- ✅ Ícone para instalar no iPhone/Android -->
+  <!-- Ícone para instalar no iPhone/Android -->
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
 
@@ -28,11 +28,12 @@
     .Alimentação {background: #ff7043;}
     .Transporte {background: #42a5f5;}
     .Lazer {background: #ab47bc;}
-    .Contas.Fixas {background: #66bb6a;}
+    .ContasFixas {background: #66bb6a;}
     .Outros {background: #8d6e63;}
     .btn-excluir {background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer;}
     .btn-excluir:hover {background: #c62828;}
     .resumo {margin-top: 10px; background: #e0f7fa; padding: 10px; border-radius: 5px;}
+    .loading {text-align: center; padding: 20px; color: #666;}
   </style>
 </head>
 <body>
@@ -40,12 +41,12 @@
 <div class="container">
   <h3>Adicionar Gasto</h3>
   <input type="text" id="nome" placeholder="Descrição do gasto">
-  <input type="number" id="valor" placeholder="Valor (R$)">
+  <input type="number" id="valor" placeholder="Valor (R$)" step="0.01">
   <select id="categoria">
     <option value="Alimentação">Alimentação 🍔</option>
     <option value="Transporte">Transporte 🚌</option>
     <option value="Lazer">Lazer 🎉</option>
-    <option value="Contas Fixas">Contas Fixas 🏠</option>
+    <option value="Contas Fixas">Contas Fixas �</option>
     <option value="Outros">Outros 💼</option>
   </select>
   <select id="tipo">
@@ -70,6 +71,7 @@
 
   <h3>Selecionar Mês</h3>
   <select id="mesFiltro" onchange="atualizarLista()">
+    <option value="Todos">Todos os meses</option>
     <option value="Janeiro">Janeiro</option>
     <option value="Fevereiro">Fevereiro</option>
     <option value="Março">Março</option>
@@ -86,83 +88,182 @@
 
   <div class="resumo" id="resumo"></div>
 
-  <h3>Gastos do Mês</h3>
-  <div id="lista"></div>
+  <h3>Gastos</h3>
+  <div id="lista"><div class="loading">Carregando...</div></div>
 
   <button class="btn-limpar" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } 
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } 
           from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+  // Configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDYm97mMo_5LL1iHaIlqaPEkzl79TQBDmA",
     authDomain: "controle-gastos-9fab2.firebaseapp.com",
     projectId: "controle-gastos-9fab2",
-    storageBucket: "controle-gastos-9fab2.firebasestorage.app",
+    storageBucket: "controle-gastos-9fab2.appspot.com",
     messagingSenderId: "535575893848",
     appId: "1:535575893848:web:4612a02e2bfb4f4362b72d"
   };
 
+  // Inicializa o Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // Função para adicionar gasto
   async function adicionarGasto() {
-    let nome = document.getElementById("nome").value;
-    let valor = parseFloat(document.getElementById("valor").value);
-    let categoria = document.getElementById("categoria").value;
-    let tipo = document.getElementById("tipo").value;
-    let mes = document.getElementById("mes").value;
-    if (!nome || !valor) { alert("Preencha todos os campos!"); return; }
-    await addDoc(collection(db, "gastos"), { nome, valor, categoria, tipo, mes });
-    document.getElementById("mesFiltro").value = mes;
-    atualizarLista();
-    document.getElementById("nome").value = ""; document.getElementById("valor").value = "";
-  }
-
-  async function atualizarLista() {
-    let lista = document.getElementById("lista");
-    lista.innerHTML = "";
-    let totalFixo = 0, totalVariavel = 0;
-    let mesSelecionado = document.getElementById("mesFiltro").value;
-    const querySnapshot = await getDocs(collection(db, "gastos"));
-    querySnapshot.forEach((docSnap) => {
-      let g = docSnap.data();
-      if (g.mes === mesSelecionado) {
-        let card = document.createElement("div");
-        card.className = "gasto-card";
-        card.innerHTML = `
-          <div><strong>${g.nome}</strong> - R$ ${g.valor.toFixed(2)}
-          <div class="categoria ${g.categoria.replace(' ','')}">${g.categoria}</div>
-          <small>${g.tipo}</small></div>
-          <button class="btn-excluir" onclick="excluirGasto('${docSnap.id}')">Excluir</button>`;
-        lista.appendChild(card);
-        if (g.tipo === "Fixo") totalFixo += g.valor; else totalVariavel += g.valor;
+    try {
+      const nome = document.getElementById("nome").value.trim();
+      const valor = parseFloat(document.getElementById("valor").value);
+      const categoria = document.getElementById("categoria").value;
+      const tipo = document.getElementById("tipo").value;
+      const mes = document.getElementById("mes").value;
+      
+      // Validação
+      if (!nome || isNaN(valor) {
+        alert("Por favor, preencha todos os campos corretamente!");
+        return;
       }
-    });
-    document.getElementById("resumo").innerHTML =
-      `<strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}<br>
-       <strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}<br>
-       <strong>Total Geral:</strong> R$ ${(totalFixo+totalVariavel).toFixed(2)}`;
+
+      // Adiciona ao Firestore
+      await addDoc(collection(db, "gastos"), {
+        nome,
+        valor,
+        categoria,
+        tipo,
+        mes,
+        data: new Date().toISOString()
+      });
+
+      // Limpa os campos
+      document.getElementById("nome").value = "";
+      document.getElementById("valor").value = "";
+      
+      // Atualiza a lista
+      document.getElementById("mesFiltro").value = mes;
+      atualizarLista();
+      
+    } catch (error) {
+      console.error("Erro ao adicionar gasto:", error);
+      alert("Ocorreu um erro ao adicionar o gasto. Verifique o console para mais detalhes.");
+    }
   }
 
-  window.excluirGasto = async (id) => { if (confirm("Excluir?")) { await deleteDoc(doc(db, "gastos", id)); atualizarLista(); } };
-  window.limparDados = async () => {
-    if (confirm("Apagar todos os dados?")) {
-      const querySnapshot = await getDocs(collection(db, "gastos"));
-      for (let d of querySnapshot.docs) await deleteDoc(doc(db, "gastos", d.id));
-      atualizarLista();
+  // Função para atualizar a lista de gastos
+  async function atualizarLista() {
+    try {
+      const lista = document.getElementById("lista");
+      const mesSelecionado = document.getElementById("mesFiltro").value;
+      
+      lista.innerHTML = '<div class="loading">Carregando...</div>';
+      
+      let totalFixo = 0, totalVariavel = 0;
+      let html = "";
+      
+      // Consulta os gastos no Firestore
+      const gastosRef = collection(db, "gastos");
+      let q;
+      
+      if (mesSelecionado === "Todos") {
+        q = query(gastosRef);
+      } else {
+        q = query(gastosRef, where("mes", "==", mesSelecionado));
+      }
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        lista.innerHTML = '<div class="loading">Nenhum gasto encontrado para este mês.</div>';
+        document.getElementById("resumo").innerHTML = "";
+        return;
+      }
+      
+      querySnapshot.forEach((docSnap) => {
+        const g = docSnap.data();
+        const categoriaClass = g.categoria.replace(/\s+/g, '');
+        
+        html += `
+          <div class="gasto-card">
+            <div>
+              <strong>${g.nome}</strong> - R$ ${g.valor.toFixed(2)}
+              <div class="categoria ${categoriaClass}">${g.categoria}</div>
+              <small>${g.tipo}</small>
+            </div>
+            <button class="btn-excluir" onclick="excluirGasto('${docSnap.id}')">Excluir</button>
+          </div>`;
+        
+        if (g.tipo === "Fixo") totalFixo += g.valor;
+        else totalVariavel += g.valor;
+      });
+      
+      lista.innerHTML = html;
+      
+      // Atualiza o resumo
+      document.getElementById("resumo").innerHTML = `
+        <strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}<br>
+        <strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}<br>
+        <strong>Total Geral:</strong> R$ ${(totalFixo + totalVariavel).toFixed(2)}`;
+        
+    } catch (error) {
+      console.error("Erro ao carregar gastos:", error);
+      lista.innerHTML = '<div class="loading">Erro ao carregar os gastos.</div>';
+    }
+  }
+
+  // Função para excluir um gasto
+  window.excluirGasto = async (id) => {
+    if (confirm("Tem certeza que deseja excluir este gasto?")) {
+      try {
+        await deleteDoc(doc(db, "gastos", id));
+        atualizarLista();
+      } catch (error) {
+        console.error("Erro ao excluir gasto:", error);
+        alert("Erro ao excluir o gasto.");
+      }
     }
   };
 
-  // ✅ Registrar Service Worker para PWA
+  // Função para limpar todos os dados
+  window.limparDados = async () => {
+    if (confirm("⚠️ ATENÇÃO! Isso apagará TODOS os gastos. Continuar?")) {
+      try {
+        const querySnapshot = await getDocs(collection(db, "gastos"));
+        const deletePromises = [];
+        
+        querySnapshot.forEach((doc) => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        
+        await Promise.all(deletePromises);
+        atualizarLista();
+        alert("Todos os dados foram apagados com sucesso!");
+      } catch (error) {
+        console.error("Erro ao limpar dados:", error);
+        alert("Erro ao limpar os dados.");
+      }
+    }
+  };
+
+  // Registrar Service Worker para PWA
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js").then(() => console.log("✅ Service Worker registrado"));
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(registration => {
+          console.log("ServiceWorker registrado com sucesso:", registration.scope);
+        })
+        .catch(error => {
+          console.log("Falha ao registrar ServiceWorker:", error);
+        });
+    });
   }
 
-  atualizarLista();
+  // Inicializa a lista quando a página carrega
+  document.addEventListener("DOMContentLoaded", () => {
+    atualizarLista();
+  });
 </script>
 </body>
 </html>
