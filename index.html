@@ -16,7 +16,15 @@
         button {background: #4CAF50; color: white; font-weight: bold; cursor: pointer;}
         button:hover {background: #45a049;}
         .btn-limpar {background: #f44336;} .btn-limpar:hover {background: #d32f2f;}
-        ul {list-style: none; padding: 0;} li {background: #eee; margin: 5px 0; padding: 8px; border-radius: 5px;}
+        .gasto-card {background: #eee; margin: 8px 0; padding: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;}
+        .categoria {font-weight: bold; padding: 3px 6px; border-radius: 4px; color: white;}
+        .Alimentação {background: #ff7043;}
+        .Transporte {background: #42a5f5;}
+        .Lazer {background: #ab47bc;}
+        .Contas.Fixas {background: #66bb6a;}
+        .Outros {background: #8d6e63;}
+        .btn-excluir {background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer;}
+        .btn-excluir:hover {background: #c62828;}
         .resumo {margin-top: 10px; background: #e0f7fa; padding: 10px; border-radius: 5px;}
     </style>
 </head>
@@ -27,11 +35,11 @@
     <input type="text" id="nome" placeholder="Descrição do gasto">
     <input type="number" id="valor" placeholder="Valor (R$)">
     <select id="categoria">
-        <option value="Alimentação">Alimentação</option>
-        <option value="Transporte">Transporte</option>
-        <option value="Lazer">Lazer</option>
-        <option value="Contas Fixas">Contas Fixas</option>
-        <option value="Outros">Outros</option>
+        <option value="Alimentação">Alimentação 🍔</option>
+        <option value="Transporte">Transporte 🚌</option>
+        <option value="Lazer">Lazer 🎉</option>
+        <option value="Contas Fixas">Contas Fixas 🏠</option>
+        <option value="Outros">Outros 💼</option>
     </select>
     <select id="tipo">
         <option value="Fixo">Fixo</option>
@@ -75,7 +83,7 @@
     <div class="resumo" id="resumo"></div>
 
     <h3>Gastos do Mês</h3>
-    <ul id="lista"></ul>
+    <div id="lista"></div>
 
     <button class="btn-limpar" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
 </div>
@@ -99,12 +107,10 @@
             return;
         }
 
-        gastos.push({ nome, valor, categoria, tipo, mes });
+        gastos.push({ id: Date.now(), nome, valor, categoria, tipo, mes });
         salvar();
-
         document.getElementById("mesFiltro").value = mes;
         atualizarLista();
-
         document.getElementById("nome").value = "";
         document.getElementById("valor").value = "";
     }
@@ -119,9 +125,22 @@
         let gastosFiltrados = gastos.filter(g => g.mes === mesSelecionado);
 
         gastosFiltrados.forEach(g => {
-            let li = document.createElement("li");
-            li.textContent = `${g.nome} (R$ ${g.valor.toFixed(2)}) [${g.categoria} - ${g.tipo}]`;
-            lista.appendChild(li);
+            let card = document.createElement("div");
+            card.className = "gasto-card";
+
+            let info = document.createElement("div");
+            info.innerHTML = `<strong>${g.nome}</strong> - R$ ${g.valor.toFixed(2)}
+            <div class="categoria ${g.categoria.replace(' ','')}">${g.categoria}</div>
+            <small>${g.tipo}</small>`;
+
+            let btnExcluir = document.createElement("button");
+            btnExcluir.className = "btn-excluir";
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.onclick = () => excluirGasto(g.id);
+
+            card.appendChild(info);
+            card.appendChild(btnExcluir);
+            lista.appendChild(card);
 
             if (g.tipo === "Fixo") totalFixo += g.valor;
             else totalVariavel += g.valor;
@@ -140,21 +159,21 @@
         `;
     }
 
+    function excluirGasto(id) {
+        if (confirm("Deseja excluir este gasto?")) {
+            gastos = gastos.filter(g => g.id !== id);
+            salvar();
+            atualizarLista();
+        }
+    }
+
     function limparDados() {
         if (confirm("Tem certeza que deseja apagar todos os dados?")) {
             gastos = [];
             salvar();
             atualizarLista();
-            document.getElementById("lista").innerHTML = "";
-            document.getElementById("resumo").innerHTML = "";
             alert("✅ Todos os dados foram apagados!");
         }
-    }
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js')
-            .then(() => console.log('Service Worker registrado com sucesso!'))
-            .catch(err => console.log('Erro ao registrar Service Worker:', err));
     }
 
     document.addEventListener("DOMContentLoaded", atualizarLista);
