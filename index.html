@@ -109,8 +109,12 @@
 
         gastos.push({ id: Date.now(), nome, valor, categoria, tipo, mes });
         salvar();
+
+        // ✅ Corrigido: atualizar o filtro para o mesmo mês escolhido
         document.getElementById("mesFiltro").value = mes;
+
         atualizarLista();
+
         document.getElementById("nome").value = "";
         document.getElementById("valor").value = "";
     }
