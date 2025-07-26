@@ -1,186 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Gastos</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4CAF50">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <style>
-        body {font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0;}
-        header {background: #4CAF50; color: white; text-align: center; padding: 15px; font-size: 20px;}
-        .container {max-width: 500px; margin: 20px auto; background: white; padding: 15px;
-                    border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
-        input, select, button {width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc;}
-        button {background: #4CAF50; color: white; font-weight: bold; cursor: pointer;}
-        button:hover {background: #45a049;}
-        .btn-limpar {background: #f44336;} .btn-limpar:hover {background: #d32f2f;}
-        .gasto-card {background: #eee; margin: 8px 0; padding: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;}
-        .categoria {font-weight: bold; padding: 3px 6px; border-radius: 4px; color: white;}
-        .Alimentação {background: #ff7043;}
-        .Transporte {background: #42a5f5;}
-        .Lazer {background: #ab47bc;}
-        .Contas.Fixas {background: #66bb6a;}
-        .Outros {background: #8d6e63;}
-        .btn-excluir {background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer;}
-        .btn-excluir:hover {background: #c62828;}
-        .resumo {margin-top: 10px; background: #e0f7fa; padding: 10px; border-radius: 5px;}
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Gastos - Firebase</title>
+
+  <!-- ✅ Manifesto e cor do tema -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+
+  <!-- ✅ Ícone para instalar no iPhone/Android -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
+
+  <style>
+    body {font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0;}
+    header {background: #4CAF50; color: white; text-align: center; padding: 15px; font-size: 20px;}
+    .container {max-width: 500px; margin: 20px auto; background: white; padding: 15px;
+                border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
+    input, select, button {width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc;}
+    button {background: #4CAF50; color: white; font-weight: bold; cursor: pointer;}
+    button:hover {background: #45a049;}
+    .btn-limpar {background: #f44336;} .btn-limpar:hover {background: #d32f2f;}
+    .gasto-card {background: #eee; margin: 8px 0; padding: 10px; border-radius: 5px;
+                 display: flex; justify-content: space-between; align-items: center;}
+    .categoria {font-weight: bold; padding: 3px 6px; border-radius: 4px; color: white;}
+    .Alimentação {background: #ff7043;}
+    .Transporte {background: #42a5f5;}
+    .Lazer {background: #ab47bc;}
+    .Contas.Fixas {background: #66bb6a;}
+    .Outros {background: #8d6e63;}
+    .btn-excluir {background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer;}
+    .btn-excluir:hover {background: #c62828;}
+    .resumo {margin-top: 10px; background: #e0f7fa; padding: 10px; border-radius: 5px;}
+  </style>
 </head>
 <body>
-<header>💰 Controle de Gastos</header>
+<header>💰 Controle de Gastos (Firebase)</header>
 <div class="container">
-    <h3>Adicionar Gasto</h3>
-    <input type="text" id="nome" placeholder="Descrição do gasto">
-    <input type="number" id="valor" placeholder="Valor (R$)">
-    <select id="categoria">
-        <option value="Alimentação">Alimentação 🍔</option>
-        <option value="Transporte">Transporte 🚌</option>
-        <option value="Lazer">Lazer 🎉</option>
-        <option value="Contas Fixas">Contas Fixas 🏠</option>
-        <option value="Outros">Outros 💼</option>
-    </select>
-    <select id="tipo">
-        <option value="Fixo">Fixo</option>
-        <option value="Variável">Variável</option>
-    </select>
-    <select id="mes">
-        <option value="Janeiro">Janeiro</option>
-        <option value="Fevereiro">Fevereiro</option>
-        <option value="Março">Março</option>
-        <option value="Abril">Abril</option>
-        <option value="Maio">Maio</option>
-        <option value="Junho">Junho</option>
-        <option value="Julho">Julho</option>
-        <option value="Agosto">Agosto</option>
-        <option value="Setembro">Setembro</option>
-        <option value="Outubro">Outubro</option>
-        <option value="Novembro">Novembro</option>
-        <option value="Dezembro">Dezembro</option>
-    </select>
-    <button onclick="adicionarGasto()">➕ Adicionar</button>
+  <h3>Adicionar Gasto</h3>
+  <input type="text" id="nome" placeholder="Descrição do gasto">
+  <input type="number" id="valor" placeholder="Valor (R$)">
+  <select id="categoria">
+    <option value="Alimentação">Alimentação 🍔</option>
+    <option value="Transporte">Transporte 🚌</option>
+    <option value="Lazer">Lazer 🎉</option>
+    <option value="Contas Fixas">Contas Fixas 🏠</option>
+    <option value="Outros">Outros 💼</option>
+  </select>
+  <select id="tipo">
+    <option value="Fixo">Fixo</option>
+    <option value="Variável">Variável</option>
+  </select>
+  <select id="mes">
+    <option value="Janeiro">Janeiro</option>
+    <option value="Fevereiro">Fevereiro</option>
+    <option value="Março">Março</option>
+    <option value="Abril">Abril</option>
+    <option value="Maio">Maio</option>
+    <option value="Junho">Junho</option>
+    <option value="Julho">Julho</option>
+    <option value="Agosto">Agosto</option>
+    <option value="Setembro">Setembro</option>
+    <option value="Outubro">Outubro</option>
+    <option value="Novembro">Novembro</option>
+    <option value="Dezembro">Dezembro</option>
+  </select>
+  <button onclick="adicionarGasto()">➕ Adicionar</button>
 
-    <h3>Definir Orçamento Mensal</h3>
-    <input type="number" id="orcamento" placeholder="Orçamento mensal (R$)" oninput="atualizarLista()">
+  <h3>Selecionar Mês</h3>
+  <select id="mesFiltro" onchange="atualizarLista()">
+    <option value="Janeiro">Janeiro</option>
+    <option value="Fevereiro">Fevereiro</option>
+    <option value="Março">Março</option>
+    <option value="Abril">Abril</option>
+    <option value="Maio">Maio</option>
+    <option value="Junho">Junho</option>
+    <option value="Julho">Julho</option>
+    <option value="Agosto">Agosto</option>
+    <option value="Setembro">Setembro</option>
+    <option value="Outubro">Outubro</option>
+    <option value="Novembro">Novembro</option>
+    <option value="Dezembro">Dezembro</option>
+  </select>
 
-    <h3>Selecionar Mês para Visualização</h3>
-    <select id="mesFiltro" onchange="atualizarLista()">
-        <option value="Janeiro">Janeiro</option>
-        <option value="Fevereiro">Fevereiro</option>
-        <option value="Março">Março</option>
-        <option value="Abril">Abril</option>
-        <option value="Maio">Maio</option>
-        <option value="Junho">Junho</option>
-        <option value="Julho">Julho</option>
-        <option value="Agosto">Agosto</option>
-        <option value="Setembro">Setembro</option>
-        <option value="Outubro">Outubro</option>
-        <option value="Novembro">Novembro</option>
-        <option value="Dezembro">Dezembro</option>
-    </select>
+  <div class="resumo" id="resumo"></div>
 
-    <div class="resumo" id="resumo"></div>
+  <h3>Gastos do Mês</h3>
+  <div id="lista"></div>
 
-    <h3>Gastos do Mês</h3>
-    <div id="lista"></div>
-
-    <button class="btn-limpar" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
+  <button class="btn-limpar" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
 </div>
 
-<script>
-    let gastos = JSON.parse(localStorage.getItem("gastos")) || [];
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } 
+          from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    function salvar() {
-        localStorage.setItem("gastos", JSON.stringify(gastos));
+  const firebaseConfig = {
+    apiKey: "AIzaSyDYm97mMo_5LL1iHaIlqaPEkzl79TQBDmA",
+    authDomain: "controle-gastos-9fab2.firebaseapp.com",
+    projectId: "controle-gastos-9fab2",
+    storageBucket: "controle-gastos-9fab2.firebasestorage.app",
+    messagingSenderId: "535575893848",
+    appId: "1:535575893848:web:4612a02e2bfb4f4362b72d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function adicionarGasto() {
+    let nome = document.getElementById("nome").value;
+    let valor = parseFloat(document.getElementById("valor").value);
+    let categoria = document.getElementById("categoria").value;
+    let tipo = document.getElementById("tipo").value;
+    let mes = document.getElementById("mes").value;
+    if (!nome || !valor) { alert("Preencha todos os campos!"); return; }
+    await addDoc(collection(db, "gastos"), { nome, valor, categoria, tipo, mes });
+    document.getElementById("mesFiltro").value = mes;
+    atualizarLista();
+    document.getElementById("nome").value = ""; document.getElementById("valor").value = "";
+  }
+
+  async function atualizarLista() {
+    let lista = document.getElementById("lista");
+    lista.innerHTML = "";
+    let totalFixo = 0, totalVariavel = 0;
+    let mesSelecionado = document.getElementById("mesFiltro").value;
+    const querySnapshot = await getDocs(collection(db, "gastos"));
+    querySnapshot.forEach((docSnap) => {
+      let g = docSnap.data();
+      if (g.mes === mesSelecionado) {
+        let card = document.createElement("div");
+        card.className = "gasto-card";
+        card.innerHTML = `
+          <div><strong>${g.nome}</strong> - R$ ${g.valor.toFixed(2)}
+          <div class="categoria ${g.categoria.replace(' ','')}">${g.categoria}</div>
+          <small>${g.tipo}</small></div>
+          <button class="btn-excluir" onclick="excluirGasto('${docSnap.id}')">Excluir</button>`;
+        lista.appendChild(card);
+        if (g.tipo === "Fixo") totalFixo += g.valor; else totalVariavel += g.valor;
+      }
+    });
+    document.getElementById("resumo").innerHTML =
+      `<strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}<br>
+       <strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}<br>
+       <strong>Total Geral:</strong> R$ ${(totalFixo+totalVariavel).toFixed(2)}`;
+  }
+
+  window.excluirGasto = async (id) => { if (confirm("Excluir?")) { await deleteDoc(doc(db, "gastos", id)); atualizarLista(); } };
+  window.limparDados = async () => {
+    if (confirm("Apagar todos os dados?")) {
+      const querySnapshot = await getDocs(collection(db, "gastos"));
+      for (let d of querySnapshot.docs) await deleteDoc(doc(db, "gastos", d.id));
+      atualizarLista();
     }
+  };
 
-    function adicionarGasto() {
-        let nome = document.getElementById("nome").value;
-        let valor = parseFloat(document.getElementById("valor").value);
-        let categoria = document.getElementById("categoria").value;
-        let tipo = document.getElementById("tipo").value;
-        let mes = document.getElementById("mes").value;
+  // ✅ Registrar Service Worker para PWA
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").then(() => console.log("✅ Service Worker registrado"));
+  }
 
-        if (!nome || !valor) {
-            alert("Preencha todos os campos!");
-            return;
-        }
-
-        gastos.push({ id: Date.now(), nome, valor, categoria, tipo, mes });
-        salvar();
-
-        // ✅ Corrigido: atualizar o filtro para o mesmo mês escolhido
-        document.getElementById("mesFiltro").value = mes;
-
-        atualizarLista();
-
-        document.getElementById("nome").value = "";
-        document.getElementById("valor").value = "";
-    }
-
-    function atualizarLista() {
-        gastos = JSON.parse(localStorage.getItem("gastos")) || [];
-        let lista = document.getElementById("lista");
-        lista.innerHTML = "";
-        let totalFixo = 0, totalVariavel = 0;
-        let mesSelecionado = document.getElementById("mesFiltro").value;
-
-        let gastosFiltrados = gastos.filter(g => g.mes === mesSelecionado);
-
-        gastosFiltrados.forEach(g => {
-            let card = document.createElement("div");
-            card.className = "gasto-card";
-
-            let info = document.createElement("div");
-            info.innerHTML = `<strong>${g.nome}</strong> - R$ ${g.valor.toFixed(2)}
-            <div class="categoria ${g.categoria.replace(' ','')}">${g.categoria}</div>
-            <small>${g.tipo}</small>`;
-
-            let btnExcluir = document.createElement("button");
-            btnExcluir.className = "btn-excluir";
-            btnExcluir.textContent = "Excluir";
-            btnExcluir.onclick = () => excluirGasto(g.id);
-
-            card.appendChild(info);
-            card.appendChild(btnExcluir);
-            lista.appendChild(card);
-
-            if (g.tipo === "Fixo") totalFixo += g.valor;
-            else totalVariavel += g.valor;
-        });
-
-        let resumoEl = document.getElementById("resumo");
-        let orcamento = parseFloat(document.getElementById("orcamento").value) || 0;
-        let totalGeral = totalFixo + totalVariavel;
-        let saldo = orcamento ? (orcamento - totalGeral) : null;
-
-        resumoEl.innerHTML = `
-            <strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}<br>
-            <strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}<br>
-            <strong>Total Geral:</strong> R$ ${totalGeral.toFixed(2)}<br>
-            ${orcamento ? `<strong>Orçamento:</strong> R$ ${orcamento.toFixed(2)}<br><strong>Saldo:</strong> R$ ${saldo.toFixed(2)}` : ""}
-        `;
-    }
-
-    function excluirGasto(id) {
-        if (confirm("Deseja excluir este gasto?")) {
-            gastos = gastos.filter(g => g.id !== id);
-            salvar();
-            atualizarLista();
-        }
-    }
-
-    function limparDados() {
-        if (confirm("Tem certeza que deseja apagar todos os dados?")) {
-            gastos = [];
-            salvar();
-            atualizarLista();
-            alert("✅ Todos os dados foram apagados!");
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", atualizarLista);
+  atualizarLista();
 </script>
 </body>
 </html>
