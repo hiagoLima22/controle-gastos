@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+  <div class="w-full max-w-md p-4">
+    <h1 class="text-2xl font-bold text-center text-green-600 mb-4">💰 Controle Financeiro</h1>
+
+    <!-- Formulário de Despesa -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">Adicionar Despesa</h2>
+      <form id="despesaForm" class="space-y-2">
+        <input type="text" id="nome" placeholder="Nome da Despesa" class="w-full border rounded p-2" required>
+        <input type="number" id="valor" placeholder="Valor da Despesa" class="w-full border rounded p-2" required>
+        <select id="tipo" class="w-full border rounded p-2">
+          <option value="fixa">Fixa</option>
+          <option value="variavel">Variável</option>
+        </select>
+        <select id="mes" class="w-full border rounded p-2">
+          <option value="">Selecione o Mês</option>
+          <option value="janeiro">Janeiro</option>
+          <option value="fevereiro">Fevereiro</option>
+          <option value="marco">Março</option>
+          <option value="abril">Abril</option>
+          <option value="maio">Maio</option>
+          <option value="junho">Junho</option>
+          <option value="julho">Julho</option>
+          <option value="agosto">Agosto</option>
+          <option value="setembro">Setembro</option>
+          <option value="outubro">Outubro</option>
+          <option value="novembro">Novembro</option>
+          <option value="dezembro">Dezembro</option>
+        </select>
+        <input type="text" id="cartao" placeholder="Cartão (opcional)" class="w-full border rounded p-2">
+        <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Adicionar Despesa</button>
+      </form>
+    </div>
+
+    <!-- Receita -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">Receita Mensal</h2>
+      <div class="flex space-x-2">
+        <input type="number" id="receita" placeholder="Valor da Receita" class="flex-1 border rounded p-2">
+        <button id="salvarReceita" class="bg-blue-500 text-white px-3 rounded hover:bg-blue-600">Salvar</button>
+      </div>
+    </div>
+
+    <!-- Resumo do Mês -->
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">Resumo do Mês</h2>
+      <div class="flex space-x-2 mb-3">
+        <select id="mesResumo" class="flex-1 border rounded p-2">
+          <option value="">Selecione o Mês</option>
+          <option value="janeiro">Janeiro</option>
+          <option value="fevereiro">Fevereiro</option>
+          <option value="marco">Março</option>
+          <option value="abril">Abril</option>
+          <option value="maio">Maio</option>
+          <option value="junho">Junho</option>
+          <option value="julho">Julho</option>
+          <option value="agosto">Agosto</option>
+          <option value="setembro">Setembro</option>
+          <option value="outubro">Outubro</option>
+          <option value="novembro">Novembro</option>
+          <option value="dezembro">Dezembro</option>
+        </select>
+        <button id="verResumo" class="bg-yellow-500 text-white px-3 rounded hover:bg-yellow-600">Ver</button>
+      </div>
+      <div id="listaDespesas" class="space-y-2"></div>
+      <div id="saldo" class="mt-3 text-center font-bold text-lg text-green-600"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+</body>
+</html>
