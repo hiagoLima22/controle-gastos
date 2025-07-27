@@ -281,46 +281,62 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Função para adicionar gasto
+  // Teste de conexão com Firestore
+  async function testarConexaoFirestore() {
+    try {
+      console.log("Testando conexão com Firestore...");
+      const docRef = await addDoc(collection(db, "testes_conexao"), {
+        teste: "Teste de conexão em " + new Date().toISOString()
+      });
+      console.log("Conexão com Firestore OK! Documento ID:", docRef.id);
+      await deleteDoc(doc(db, "testes_conexao", docRef.id));
+    } catch (error) {
+      console.error("Falha na conexão com Firestore:", error);
+      alert("Erro de conexão com o banco de dados. Verifique o console.");
+    }
+  }
+
+  // Função para adicionar gasto com depuração
   async function adicionarGasto() {
     try {
+      console.log("Iniciando adição de gasto...");
+      
       const nome = document.getElementById("nome").value.trim();
       const valor = parseFloat(document.getElementById("valor").value);
       const categoria = document.getElementById("categoria").value;
       const tipo = document.getElementById("tipo").value;
       const mes = document.getElementById("mes").value;
-      
-      // Validação
-      if (!nome || isNaN(valor) || !categoria || !tipo || !mes) {
-        alert("Por favor, preencha todos os campos corretamente!");
+
+      console.log("Valores capturados:", { nome, valor, categoria, tipo, mes });
+
+      if (!nome || isNaN(valor) {
+        alert("Preencha todos os campos corretamente!");
         return;
       }
 
-      // Adiciona ao Firestore
-      await addDoc(collection(db, "gastos"), {
+      console.log("Conectando ao Firestore...");
+      const docRef = await addDoc(collection(db, "gastos"), {
         nome,
         valor,
         categoria,
         tipo,
-        mes,  // Usa o mês selecionado no formulário
-        data: new Date().toISOString()
+        mes,
+        timestamp: new Date()
       });
 
-      // Limpa os campos (exceto o mês)
+      console.log("Documento adicionado com ID: ", docRef.id);
+      alert(`Gasto adicionado em ${mes}! ID: ${docRef.id}`);
+
+      // Limpar campos
       document.getElementById("nome").value = "";
       document.getElementById("valor").value = "";
-      document.getElementById("categoria").value = "";
-      document.getElementById("tipo").value = "";
       
-      // Atualiza a lista mantendo o filtro atual
+      // Atualizar lista
       atualizarLista();
-      
-      // Feedback visual
-      alert(`Gasto de ${mes} adicionado com sucesso!`);
-      
+
     } catch (error) {
-      console.error("Erro ao adicionar gasto:", error);
-      alert("Ocorreu um erro ao adicionar o gasto. Verifique o console para mais detalhes.");
+      console.error("Erro detalhado:", error);
+      alert(`Erro ao adicionar gasto: ${error.message}`);
     }
   }
 
@@ -454,21 +470,18 @@
     }
   };
 
-  // Inicialização - CORRIGIDA para não interferir na seleção de mês
+  // Inicialização
   document.addEventListener("DOMContentLoaded", () => {
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
                   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const mesAtual = meses[new Date().getMonth()];
     
-    // Define o mês atual apenas como sugestão (remove o selected dos options primeiro)
-    document.querySelectorAll('#mes option').forEach(option => {
-      option.removeAttribute('selected');
-    });
+    // Define valores iniciais
     document.getElementById("mes").value = mesAtual;
-    
-    // Define o filtro para o mês atual
     document.getElementById("mesFiltro").value = mesAtual;
     
+    // Testa a conexão e carrega os dados
+    testarConexaoFirestore();
     atualizarLista();
   });
 </script>
