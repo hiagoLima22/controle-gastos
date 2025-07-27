@@ -3,95 +3,263 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Gastos - Firebase</title>
-
-  <!-- Manifesto e cor do tema -->
-  <link rel="manifest" href="manifest.json">
+  <title>Controle de Gastos PWA</title>
+  <meta name="description" content="Aplicativo para controle de gastos pessoais">
+  
+  <!-- Meta tags PWA -->
   <meta name="theme-color" content="#4CAF50">
-
-  <!-- Ícone para instalar no iPhone/Android -->
+  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="shortcut icon" href="icons/icon-192.png" type="image/png">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
 
   <style>
-    body {font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0;}
-    header {background: #4CAF50; color: white; text-align: center; padding: 15px; font-size: 20px;}
-    .container {max-width: 500px; margin: 20px auto; background: white; padding: 15px;
-                border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
-    input, select, button {width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc;}
-    button {background: #4CAF50; color: white; font-weight: bold; cursor: pointer;}
-    button:hover {background: #45a049;}
-    .btn-limpar {background: #f44336;} .btn-limpar:hover {background: #d32f2f;}
-    .gasto-card {background: #eee; margin: 8px 0; padding: 10px; border-radius: 5px;
-                 display: flex; justify-content: space-between; align-items: center;}
-    .categoria {font-weight: bold; padding: 3px 6px; border-radius: 4px; color: white;}
-    .Alimentação {background: #ff7043;}
-    .Transporte {background: #42a5f5;}
-    .Lazer {background: #ab47bc;}
-    .ContasFixas {background: #66bb6a;}
-    .Outros {background: #8d6e63;}
-    .btn-excluir {background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer;}
-    .btn-excluir:hover {background: #c62828;}
-    .resumo {margin-top: 10px; background: #e0f7fa; padding: 10px; border-radius: 5px;}
-    .loading {text-align: center; padding: 20px; color: #666;}
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --secondary: #2196F3;
+      --danger: #F44336;
+      --danger-dark: #D32F2F;
+      --text: #333;
+      --background: #f5f5f5;
+      --card-bg: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 1rem auto;
+      padding: 1rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-dark);
+    }
+
+    .gasto-card {
+      background-color: white;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .gasto-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .categoria {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: white;
+      margin-top: 0.3rem;
+    }
+
+    .Alimentação { background-color: #FF7043; }
+    .Transporte { background-color: #42A5F5; }
+    .Lazer { background-color: #AB47BC; }
+    .ContasFixas { background-color: #66BB6A; }
+    .Outros { background-color: #8D6E63; }
+
+    .resumo {
+      background-color: #E3F2FD;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    .update-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      display: none;
+      z-index: 1000;
+    }
+
+    .update-banner button {
+      width: auto;
+      margin-left: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 0.5rem;
+      }
+      
+      .card {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-<header>💰 Controle de Gastos (Firebase)</header>
+<header>
+  <h1>💰 Controle de Gastos</h1>
+</header>
+
 <div class="container">
-  <h3>Adicionar Gasto</h3>
-  <input type="text" id="nome" placeholder="Descrição do gasto">
-  <input type="number" id="valor" placeholder="Valor (R$)" step="0.01">
-  <select id="categoria">
-    <option value="Alimentação">Alimentação 🍔</option>
-    <option value="Transporte">Transporte 🚌</option>
-    <option value="Lazer">Lazer 🎉</option>
-    <option value="Contas Fixas">Contas Fixas �</option>
-    <option value="Outros">Outros 💼</option>
-  </select>
-  <select id="tipo">
-    <option value="Fixo">Fixo</option>
-    <option value="Variável">Variável</option>
-  </select>
-  <select id="mes">
-    <option value="Janeiro">Janeiro</option>
-    <option value="Fevereiro">Fevereiro</option>
-    <option value="Março">Março</option>
-    <option value="Abril">Abril</option>
-    <option value="Maio">Maio</option>
-    <option value="Junho">Junho</option>
-    <option value="Julho">Julho</option>
-    <option value="Agosto">Agosto</option>
-    <option value="Setembro">Setembro</option>
-    <option value="Outubro">Outubro</option>
-    <option value="Novembro">Novembro</option>
-    <option value="Dezembro">Dezembro</option>
-  </select>
-  <button onclick="adicionarGasto()">➕ Adicionar</button>
+  <div class="card">
+    <h2>Adicionar Gasto</h2>
+    <input type="text" id="nome" placeholder="Descrição do gasto" required>
+    <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" min="0" required>
+    
+    <select id="categoria" required>
+      <option value="" disabled selected>Selecione uma categoria</option>
+      <option value="Alimentação">Alimentação 🍔</option>
+      <option value="Transporte">Transporte 🚌</option>
+      <option value="Lazer">Lazer 🎉</option>
+      <option value="Contas Fixas">Contas Fixas 🏠</option>
+      <option value="Outros">Outros 💼</option>
+    </select>
+    
+    <select id="tipo" required>
+      <option value="" disabled selected>Tipo de gasto</option>
+      <option value="Fixo">Fixo</option>
+      <option value="Variável">Variável</option>
+    </select>
+    
+    <select id="mes" required>
+      <option value="" disabled selected>Selecione o mês</option>
+      <option value="Janeiro">Janeiro</option>
+      <option value="Fevereiro">Fevereiro</option>
+      <option value="Março">Março</option>
+      <option value="Abril">Abril</option>
+      <option value="Maio">Maio</option>
+      <option value="Junho">Junho</option>
+      <option value="Julho">Julho</option>
+      <option value="Agosto">Agosto</option>
+      <option value="Setembro">Setembro</option>
+      <option value="Outubro">Outubro</option>
+      <option value="Novembro">Novembro</option>
+      <option value="Dezembro">Dezembro</option>
+    </select>
+    
+    <button onclick="adicionarGasto()">➕ Adicionar Gasto</button>
+  </div>
 
-  <h3>Selecionar Mês</h3>
-  <select id="mesFiltro" onchange="atualizarLista()">
-    <option value="Todos">Todos os meses</option>
-    <option value="Janeiro">Janeiro</option>
-    <option value="Fevereiro">Fevereiro</option>
-    <option value="Março">Março</option>
-    <option value="Abril">Abril</option>
-    <option value="Maio">Maio</option>
-    <option value="Junho">Junho</option>
-    <option value="Julho">Julho</option>
-    <option value="Agosto">Agosto</option>
-    <option value="Setembro">Setembro</option>
-    <option value="Outubro">Outubro</option>
-    <option value="Novembro">Novembro</option>
-    <option value="Dezembro">Dezembro</option>
-  </select>
+  <div class="card">
+    <h2>Filtrar Gastos</h2>
+    <select id="mesFiltro" onchange="atualizarLista()">
+      <option value="Todos">Todos os meses</option>
+      <option value="Janeiro">Janeiro</option>
+      <option value="Fevereiro">Fevereiro</option>
+      <option value="Março">Março</option>
+      <option value="Abril">Abril</option>
+      <option value="Maio">Maio</option>
+      <option value="Junho">Junho</option>
+      <option value="Julho">Julho</option>
+      <option value="Agosto">Agosto</option>
+      <option value="Setembro">Setembro</option>
+      <option value="Outubro">Outubro</option>
+      <option value="Novembro">Novembro</option>
+      <option value="Dezembro">Dezembro</option>
+    </select>
+  </div>
 
-  <div class="resumo" id="resumo"></div>
+  <div class="card">
+    <h2>Resumo Financeiro</h2>
+    <div class="resumo" id="resumo">
+      <p>Selecione um mês para visualizar o resumo</p>
+    </div>
+  </div>
 
-  <h3>Gastos</h3>
-  <div id="lista"><div class="loading">Carregando...</div></div>
+  <div class="card">
+    <h2>Seus Gastos</h2>
+    <div id="lista">
+      <div class="loading">Carregando seus gastos...</div>
+    </div>
+  </div>
 
-  <button class="btn-limpar" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
+  <button class="btn-danger" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
+</div>
+
+<div class="update-banner" id="updateBanner">
+  Nova versão disponível!
+  <button onclick="atualizarApp()">Atualizar Agora</button>
 </div>
 
 <script type="module">
@@ -123,7 +291,7 @@
       const mes = document.getElementById("mes").value;
       
       // Validação
-      if (!nome || isNaN(valor) {
+      if (!nome || isNaN(valor) || !categoria || !tipo || !mes) {
         alert("Por favor, preencha todos os campos corretamente!");
         return;
       }
@@ -141,10 +309,15 @@
       // Limpa os campos
       document.getElementById("nome").value = "";
       document.getElementById("valor").value = "";
+      document.getElementById("categoria").value = "";
+      document.getElementById("tipo").value = "";
       
       // Atualiza a lista
       document.getElementById("mesFiltro").value = mes;
       atualizarLista();
+      
+      // Feedback visual
+      alert("Gasto adicionado com sucesso!");
       
     } catch (error) {
       console.error("Erro ao adicionar gasto:", error);
@@ -176,8 +349,8 @@
       const querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {
-        lista.innerHTML = '<div class="loading">Nenhum gasto encontrado para este mês.</div>';
-        document.getElementById("resumo").innerHTML = "";
+        lista.innerHTML = '<div class="loading">Nenhum gasto encontrado.</div>';
+        document.getElementById("resumo").innerHTML = "<p>Nenhum gasto registrado para este período.</p>";
         return;
       }
       
@@ -190,7 +363,7 @@
             <div>
               <strong>${g.nome}</strong> - R$ ${g.valor.toFixed(2)}
               <div class="categoria ${categoriaClass}">${g.categoria}</div>
-              <small>${g.tipo}</small>
+              <small>${g.tipo} • ${g.mes}</small>
             </div>
             <button class="btn-excluir" onclick="excluirGasto('${docSnap.id}')">Excluir</button>
           </div>`;
@@ -203,9 +376,9 @@
       
       // Atualiza o resumo
       document.getElementById("resumo").innerHTML = `
-        <strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}<br>
-        <strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}<br>
-        <strong>Total Geral:</strong> R$ ${(totalFixo + totalVariavel).toFixed(2)}`;
+        <p><strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}</p>
+        <p><strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}</p>
+        <p><strong>Total Geral:</strong> R$ ${(totalFixo + totalVariavel).toFixed(2)}</p>`;
         
     } catch (error) {
       console.error("Erro ao carregar gastos:", error);
@@ -228,7 +401,7 @@
 
   // Função para limpar todos os dados
   window.limparDados = async () => {
-    if (confirm("⚠️ ATENÇÃO! Isso apagará TODOS os gastos. Continuar?")) {
+    if (confirm("⚠️ ATENÇÃO! Isso apagará TODOS os gastos permanentemente. Continuar?")) {
       try {
         const querySnapshot = await getDocs(collection(db, "gastos"));
         const deletePromises = [];
@@ -247,21 +420,50 @@
     }
   };
 
-  // Registrar Service Worker para PWA
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("service-worker.js")
+  // Service Worker e PWA
+  if ('serviceWorker' in navigator) {
+    let newWorker;
+    
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
         .then(registration => {
-          console.log("ServiceWorker registrado com sucesso:", registration.scope);
+          console.log('ServiceWorker registrado com sucesso:', registration.scope);
+          
+          registration.addEventListener('updatefound', () => {
+            newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('updateBanner').style.display = 'block';
+              }
+            });
+          });
         })
         .catch(error => {
-          console.log("Falha ao registrar ServiceWorker:", error);
+          console.log('Falha ao registrar ServiceWorker:', error);
         });
+    });
+
+    // Atualizar quando o novo service worker estiver ativo
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
     });
   }
 
+  window.atualizarApp = () => {
+    if (newWorker) {
+      newWorker.postMessage({action: 'skipWaiting'});
+    }
+  };
+
   // Inicializa a lista quando a página carrega
   document.addEventListener("DOMContentLoaded", () => {
+    // Define o mês atual como padrão
+    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+                  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const mesAtual = meses[new Date().getMonth()];
+    document.getElementById("mes").value = mesAtual;
+    document.getElementById("mesFiltro").value = mesAtual;
+    
     atualizarLista();
   });
 </script>
