@@ -1,17 +1,299 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <!-- [Previous head content remains exactly the same until the script tag] -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Gastos PWA</title>
+  <meta name="description" content="Aplicativo para controle de gastos pessoais">
+  
+  <!-- Meta tags PWA -->
+  <meta name="theme-color" content="#4CAF50">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --secondary: #2196F3;
+      --danger: #F44336;
+      --danger-dark: #D32F2F;
+      --warning: #FF9800;
+      --text: #333;
+      --background: #f5f5f5;
+      --card-bg: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 1rem auto;
+      padding: 1rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    button {
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-dark);
+    }
+
+    .btn-warning {
+      background-color: var(--warning);
+    }
+
+    .btn-warning:hover {
+      opacity: 0.9;
+    }
+
+    .gasto-card {
+      background-color: white;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .gasto-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .categoria {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: white;
+      margin-top: 0.3rem;
+    }
+
+    .Alimentação { background-color: #FF7043; }
+    .Transporte { background-color: #42A5F5; }
+    .Lazer { background-color: #AB47BC; }
+    .ContasFixas { background-color: #66BB6A; }
+    .Outros { background-color: #8D6E63; }
+
+    .resumo {
+      background-color: #E3F2FD;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    .update-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      display: none;
+      z-index: 1000;
+    }
+
+    .update-banner button {
+      width: auto;
+      margin-left: 1rem;
+    }
+
+    .debug-info {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      border-left: 4px solid var(--primary);
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 0.5rem;
+      }
+      
+      .card {
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-<!-- [Previous body content remains exactly the same until the script tag] -->
+<header>
+  <h1>💰 Controle de Gastos</h1>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2>Adicionar Gasto</h2>
+    <input type="text" id="nome" placeholder="Descrição do gasto" required>
+    <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" min="0" required>
+    
+    <select id="categoria" required>
+      <option value="" disabled selected>Selecione uma categoria</option>
+      <option value="Alimentação">Alimentação 🍔</option>
+      <option value="Transporte">Transporte 🚌</option>
+      <option value="Lazer">Lazer 🎉</option>
+      <option value="Contas Fixas">Contas Fixas 🏠</option>
+      <option value="Outros">Outros 💼</option>
+    </select>
+    
+    <select id="tipo" required>
+      <option value="" disabled selected>Tipo de gasto</option>
+      <option value="Fixo">Fixo</option>
+      <option value="Variável">Variável</option>
+    </select>
+    
+    <select id="mes" required>
+      <option value="" disabled selected>Selecione o mês</option>
+      <option value="Janeiro">Janeiro</option>
+      <option value="Fevereiro">Fevereiro</option>
+      <option value="Março">Março</option>
+      <option value="Abril">Abril</option>
+      <option value="Maio">Maio</option>
+      <option value="Junho">Junho</option>
+      <option value="Julho">Julho</option>
+      <option value="Agosto">Agosto</option>
+      <option value="Setembro">Setembro</option>
+      <option value="Outubro">Outubro</option>
+      <option value="Novembro">Novembro</option>
+      <option value="Dezembro">Dezembro</option>
+    </select>
+    
+    <button class="btn-primary" onclick="adicionarGasto()">➕ Adicionar Gasto</button>
+    <div class="debug-info" id="debugInfo">Status: Aguardando ação...</div>
+  </div>
+
+  <div class="card">
+    <h2>Filtrar Gastos</h2>
+    <select id="mesFiltro" onchange="atualizarLista()">
+      <option value="Todos">Todos os meses</option>
+      <option value="Janeiro">Janeiro</option>
+      <option value="Fevereiro">Fevereiro</option>
+      <option value="Março">Março</option>
+      <option value="Abril">Abril</option>
+      <option value="Maio">Maio</option>
+      <option value="Junho">Junho</option>
+      <option value="Julho">Julho</option>
+      <option value="Agosto">Agosto</option>
+      <option value="Setembro">Setembro</option>
+      <option value="Outubro">Outubro</option>
+      <option value="Novembro">Novembro</option>
+      <option value="Dezembro">Dezembro</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Resumo Financeiro</h2>
+    <div class="resumo" id="resumo">
+      <p>Selecione um mês para visualizar o resumo</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Seus Gastos</h2>
+    <div id="lista">
+      <div class="loading">Carregando seus gastos...</div>
+    </div>
+  </div>
+
+  <button class="btn-danger" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
+  <button class="btn-warning" onclick="verificarConexao()" style="margin-top: 10px;">
+    🔍 Verificar Conexão com Firebase
+  </button>
+</div>
+
+<div class="update-banner" id="updateBanner">
+  Nova versão disponível!
+  <button onclick="atualizarApp()">Atualizar Agora</button>
+</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } 
           from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Firebase configuration
+  // Configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDYm97mMo_5LL1iHaIlqaPEkzl79TQBDmA",
     authDomain: "controle-gastos-9fab2.firebaseapp.com",
@@ -21,45 +303,55 @@
     appId: "1:535575893848:web:4612a02e2bfb4f4362b72d"
   };
 
-  // Initialize Firebase
+  // Inicializa o Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const debugInfo = document.getElementById("debugInfo");
 
-  // Test Firestore connection
-  async function testConnection() {
+  // ========== FUNÇÕES PRINCIPAIS ========== //
+
+  // Função para verificar conexão com Firebase
+  window.verificarConexao = async function() {
     try {
-      const testDoc = await addDoc(collection(db, "connection_test"), {
-        test: "Testing Firestore connection",
-        timestamp: new Date()
+      debugInfo.textContent = "Testando conexão com Firebase...";
+      const testDoc = await addDoc(collection(db, "testes_conexao"), {
+        teste: new Date().toISOString(),
+        status: "conexao_ativa"
       });
-      await deleteDoc(doc(db, "connection_test", testDoc.id));
-      return true;
+      await deleteDoc(doc(db, "testes_conexao", testDoc.id));
+      debugInfo.textContent = "✅ Conexão com Firebase estabelecida com sucesso!";
+      alert("Conexão com Firebase funcionando perfeitamente!");
     } catch (error) {
-      console.error("Connection test failed:", error);
-      return false;
+      debugInfo.innerHTML = `❌ Falha na conexão com Firebase:<br>${error.message}`;
+      alert(`ERRO: Não foi possível conectar ao Firebase\n\n${error.message}\n\nVerifique:\n1. Sua conexão com a internet\n2. As regras do Firestore`);
     }
-  }
+  };
 
-  // Add expense function
-  window.adicionarGasto = async function() {
-    if (!await testConnection()) {
-      alert("Erro de conexão com o Firebase. Verifique sua internet e tente novamente.");
-      return;
-    }
-
-    const nome = document.getElementById("nome").value.trim();
-    const valor = parseFloat(document.getElementById("valor").value);
-    const categoria = document.getElementById("categoria").value;
-    const tipo = document.getElementById("tipo").value;
-    const mes = document.getElementById("mes").value;
-
-    if (!nome || isNaN(valor) || !categoria || !tipo || !mes) {
-      alert("Preencha todos os campos corretamente!");
-      return;
-    }
-
+  // Função para adicionar gasto
+  async function adicionarGasto() {
     try {
+      // Validação de conexão
+      if (!navigator.onLine) {
+        throw new Error("Você está offline. Conecte-se à internet.");
+      }
+
+      // Captura dos valores
+      const nome = document.getElementById("nome").value.trim();
+      const valor = parseFloat(document.getElementById("valor").value);
+      const categoria = document.getElementById("categoria").value;
+      const tipo = document.getElementById("tipo").value;
+      const mes = document.getElementById("mes").value;
+
+      // Validação dos campos
+      if (!nome) throw new Error("Descrição do gasto é obrigatória");
+      if (isNaN(valor) || valor <= 0) throw new Error("Valor inválido");
+      if (!categoria) throw new Error("Selecione uma categoria");
+      if (!tipo) throw new Error("Selecione um tipo");
+      if (!mes) throw new Error("Selecione um mês");
+
+      debugInfo.textContent = "Salvando gasto no Firebase...";
+      
+      // Adiciona ao Firestore
       const docRef = await addDoc(collection(db, "gastos"), {
         nome,
         valor,
@@ -68,29 +360,47 @@
         mes,
         timestamp: new Date()
       });
-      
-      alert(`Gasto adicionado com sucesso em ${mes}!`);
+
+      // Feedback de sucesso
+      debugInfo.innerHTML = `✅ Gasto salvo com sucesso!<br>ID: ${docRef.id}`;
+      alert(`Gasto de ${mes} adicionado com sucesso!`);
+
+      // Limpa os campos
       document.getElementById("nome").value = "";
       document.getElementById("valor").value = "";
+      document.getElementById("categoria").value = "";
+      document.getElementById("tipo").value = "";
+      
+      // Atualiza a lista
       atualizarLista();
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      alert("Erro ao adicionar gasto: " + error.message);
-    }
-  };
 
-  // Update expenses list
-  window.atualizarLista = async function() {
+    } catch (error) {
+      console.error("Erro ao adicionar gasto:", error);
+      debugInfo.innerHTML = `❌ Erro ao salvar:<br>${error.message}`;
+      alert(`ERRO: ${error.message}`);
+    }
+  }
+
+  // Função para atualizar a lista de gastos
+  async function atualizarLista() {
     try {
+      const lista = document.getElementById("lista");
       const mesSelecionado = document.getElementById("mesFiltro").value;
+      
+      lista.innerHTML = '<div class="loading">Carregando...</div>';
+      debugInfo.textContent = `Buscando gastos para: ${mesSelecionado}...`;
+      
+      // Cria a query
       const q = mesSelecionado === "Todos" 
         ? query(collection(db, "gastos"))
         : query(collection(db, "gastos"), where("mes", "==", mesSelecionado));
 
       const querySnapshot = await getDocs(q);
+      
+      // Processa os resultados
       let html = "";
       let totalFixo = 0, totalVariavel = 0;
-
+      
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         const categoriaClass = data.categoria.replace(/\s+/g, '');
@@ -108,65 +418,105 @@
         data.tipo === "Fixo" ? totalFixo += data.valor : totalVariavel += data.valor;
       });
 
-      document.getElementById("lista").innerHTML = html || '<div class="loading">Nenhum gasto encontrado</div>';
+      // Atualiza a UI
+      lista.innerHTML = html || '<div class="loading">Nenhum gasto encontrado</div>';
       document.getElementById("resumo").innerHTML = `
         <p><strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}</p>
         <p><strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}</p>
         <p><strong>Total Geral:</strong> R$ ${(totalFixo + totalVariavel).toFixed(2)}</p>`;
-    } catch (error) {
-      console.error("Error getting documents: ", error);
-    }
-  };
+      
+      debugInfo.textContent = `✅ ${querySnapshot.size} gastos encontrados`;
 
-  // Delete expense
+    } catch (error) {
+      console.error("Erro ao carregar gastos:", error);
+      debugInfo.innerHTML = `❌ Falha ao carregar:<br>${error.message}`;
+      document.getElementById("lista").innerHTML = '<div class="loading">Erro ao carregar dados</div>';
+    }
+  }
+
+  // Função para excluir um gasto
   window.excluirGasto = async function(id) {
-    if (confirm("Tem certeza que deseja excluir este gasto?")) {
+    if (confirm("Tem certeza que deseja excluir este gasto permanentemente?")) {
       try {
+        debugInfo.textContent = "Excluindo gasto...";
         await deleteDoc(doc(db, "gastos", id));
+        debugInfo.textContent = "✅ Gasto excluído com sucesso";
         atualizarLista();
       } catch (error) {
-        console.error("Error removing document: ", error);
+        console.error("Erro ao excluir:", error);
+        debugInfo.innerHTML = `❌ Falha ao excluir:<br>${error.message}`;
       }
     }
   };
 
-  // Clear all data
+  // Função para limpar todos os dados
   window.limparDados = async function() {
     if (confirm("⚠️ ATENÇÃO! Isso apagará TODOS os gastos permanentemente. Continuar?")) {
       try {
+        debugInfo.textContent = "Iniciando limpeza...";
         const snapshot = await getDocs(collection(db, "gastos"));
         const deletions = snapshot.docs.map(d => deleteDoc(doc(db, "gastos", d.id)));
         await Promise.all(deletions);
+        debugInfo.textContent = "✅ Todos os dados foram removidos";
         atualizarLista();
-        alert("Todos os dados foram removidos!");
+        alert("Base de dados limpa com sucesso!");
       } catch (error) {
-        console.error("Error clearing data: ", error);
+        console.error("Erro ao limpar dados:", error);
+        debugInfo.innerHTML = `❌ Falha na limpeza:<br>${error.message}`;
       }
     }
   };
 
-  // Initialize
-  document.addEventListener("DOMContentLoaded", () => {
+  // ========== INICIALIZAÇÃO ========== //
+
+  // Configura o mês atual como padrão
+  function configurarMesAtual() {
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
                   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const mesAtual = meses[new Date().getMonth()];
     document.getElementById("mes").value = mesAtual;
     document.getElementById("mesFiltro").value = mesAtual;
+  }
+
+  // Registra Service Worker
+  function registrarServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => {
+          console.log('Service Worker registrado:', reg.scope);
+          
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('updateBanner').style.display = 'block';
+              }
+            });
+          });
+        })
+        .catch(err => console.log('Falha no Service Worker:', err));
+    }
+  }
+
+  // Atualiza o app quando novo Service Worker estiver pronto
+  window.atualizarApp = function() {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({action: 'skipWaiting'});
+    }
+    window.location.reload();
+  };
+
+  // Inicialização ao carregar a página
+  document.addEventListener("DOMContentLoaded", () => {
+    configurarMesAtual();
+    registrarServiceWorker();
     atualizarLista();
   });
 
-  // Service Worker registration
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(registration => {
-          console.log('SW registered: ', registration.scope);
-        })
-        .catch(error => {
-          console.log('SW registration failed: ', error);
-        });
-    });
-  }
+  // Ouvinte para atualização do Service Worker
+  navigator.serviceWorker?.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 </script>
 </body>
 </html>
