@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <h1>Controle Financeiro</h1>
+
+  <form id="despesaForm">
+    <input type="text" id="nome" placeholder="Nome da Despesa" required>
+    <input type="number" id="valor" placeholder="Valor da Despesa" required>
+    <select id="tipo">
+      <option value="fixa">Fixa</option>
+      <option value="variavel">Variável</option>
+    </select>
+    <select id="mes">
+      <option value="">Selecione o Mês</option>
+      <option value="janeiro">Janeiro</option>
+      <option value="fevereiro">Fevereiro</option>
+      <option value="marco">Março</option>
+      <option value="abril">Abril</option>
+      <option value="maio">Maio</option>
+      <option value="junho">Junho</option>
+      <option value="julho">Julho</option>
+      <option value="agosto">Agosto</option>
+      <option value="setembro">Setembro</option>
+      <option value="outubro">Outubro</option>
+      <option value="novembro">Novembro</option>
+      <option value="dezembro">Dezembro</option>
+    </select>
+    <input type="text" id="cartao" placeholder="Cartão (opcional)">
+    <button type="submit">Adicionar Despesa</button>
+  </form>
+
+  <form id="receitaForm">
+    <input type="number" id="receita" placeholder="Receita Mensal">
+    <button type="button" id="salvarReceita">Salvar Receita</button>
+  </form>
+
+  <h2>Resumo do Mês</h2>
+  <select id="mesResumo">
+    <option value="">Selecione o Mês</option>
+    <option value="janeiro">Janeiro</option>
+    <option value="fevereiro">Fevereiro</option>
+    <option value="marco">Março</option>
+    <option value="abril">Abril</option>
+    <option value="maio">Maio</option>
+    <option value="junho">Junho</option>
+    <option value="julho">Julho</option>
+    <option value="agosto">Agosto</option>
+    <option value="setembro">Setembro</option>
+    <option value="outubro">Outubro</option>
+    <option value="novembro">Novembro</option>
+    <option value="dezembro">Dezembro</option>
+  </select>
+  <button id="verResumo">Ver Resumo</button>
+
+  <div id="listaDespesas"></div>
+  <div id="saldo"></div>
+
+  <script type="module" src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+</body>
+</html>
