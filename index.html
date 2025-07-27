@@ -22,6 +22,7 @@
       --text: #333;
       --background: #f5f5f5;
       --card-bg: #fff;
+      --warning: #FF9800;
     }
 
     * {
@@ -78,7 +79,6 @@
     }
 
     button {
-      background-color: var(--primary);
       color: white;
       font-weight: bold;
       border: none;
@@ -86,7 +86,11 @@
       transition: background-color 0.3s;
     }
 
-    button:hover {
+    .btn-primary {
+      background-color: var(--primary);
+    }
+
+    .btn-primary:hover {
       background-color: var(--primary-dark);
     }
 
@@ -100,6 +104,14 @@
 
     .btn-danger:hover {
       background-color: var(--danger-dark);
+    }
+
+    .btn-warning {
+      background-color: var(--warning);
+    }
+
+    .btn-warning:hover {
+      opacity: 0.9;
     }
 
     .gasto-card {
@@ -165,6 +177,12 @@
       margin-left: 1rem;
     }
 
+    .debug-info {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
     @media (max-width: 600px) {
       .container {
         padding: 0.5rem;
@@ -218,7 +236,8 @@
       <option value="Dezembro">Dezembro</option>
     </select>
     
-    <button onclick="adicionarGasto()">➕ Adicionar Gasto</button>
+    <button class="btn-primary" onclick="adicionarGasto()">➕ Adicionar Gasto</button>
+    <div class="debug-info" id="debugInfo"></div>
   </div>
 
   <div class="card">
@@ -255,6 +274,9 @@
   </div>
 
   <button class="btn-danger" onclick="limparDados()">🗑️ Limpar Todos os Dados</button>
+  <button class="btn-warning" onclick="verificarColecao()" style="margin-top: 10px;">
+    🔧 Forçar Criação da Coleção (Emergência)
+  </button>
 </div>
 
 <div class="update-banner" id="updateBanner">
@@ -280,25 +302,52 @@
   // Inicializa o Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  
+  // Elemento para debug
+  const debugInfo = document.getElementById("debugInfo");
 
-  // Teste de conexão com Firestore
-  async function testarConexaoFirestore() {
+  // Função para verificar/criar a coleção
+  window.verificarColecao = async function() {
     try {
-      console.log("Testando conexão com Firestore...");
-      const docRef = await addDoc(collection(db, "testes_conexao"), {
-        teste: "Teste de conexão em " + new Date().toISOString()
+      debugInfo.textContent = "Verificando coleção 'gastos'...";
+      console.log("Iniciando verificação da coleção 'gastos'...");
+      
+      // Tenta criar um documento de teste
+      const docRef = await addDoc(collection(db, "gastos"), {
+        teste: "Documento de teste para criar a coleção",
+        timestamp: new Date()
       });
-      console.log("Conexão com Firestore OK! Documento ID:", docRef.id);
-      await deleteDoc(doc(db, "testes_conexao", docRef.id));
+      
+      console.log("Coleção 'gastos' criada com documento ID:", docRef.id);
+      debugInfo.textContent = `✅ Coleção criada com sucesso! ID: ${docRef.id}`;
+      
+      // Remove o documento de teste após 2 segundos
+      setTimeout(async () => {
+        await deleteDoc(doc(db, "gastos", docRef.id));
+        console.log("Documento de teste removido");
+        debugInfo.textContent = "✅ Coleção 'gastos' verificada e pronta para uso";
+      }, 2000);
+      
     } catch (error) {
-      console.error("Falha na conexão com Firestore:", error);
-      alert("Erro de conexão com o banco de dados. Verifique o console.");
+      console.error("Erro ao verificar coleção 'gastos':", {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      debugInfo.innerHTML = `❌ Erro: ${error.message}<br>Verifique o console para detalhes`;
+      alert("ERRO: Não foi possível criar a coleção. Verifique o console.");
     }
-  }
+  };
 
-  // Função para adicionar gasto com depuração
+  // Função para adicionar gasto
   async function adicionarGasto() {
+    if (!navigator.onLine) {
+      alert("Você está offline! Conecte-se à internet.");
+      return;
+    }
+
     try {
+      debugInfo.textContent = "Preparando para adicionar gasto...";
       console.log("Iniciando adição de gasto...");
       
       const nome = document.getElementById("nome").value.trim();
@@ -309,12 +358,14 @@
 
       console.log("Valores capturados:", { nome, valor, categoria, tipo, mes });
 
-      if (!nome || isNaN(valor) {
+      if (!nome || isNaN(valor) || !categoria || !tipo || !mes) {
         alert("Preencha todos os campos corretamente!");
         return;
       }
 
+      debugInfo.textContent = "Conectando ao Firestore...";
       console.log("Conectando ao Firestore...");
+      
       const docRef = await addDoc(collection(db, "gastos"), {
         nome,
         valor,
@@ -325,18 +376,26 @@
       });
 
       console.log("Documento adicionado com ID: ", docRef.id);
-      alert(`Gasto adicionado em ${mes}! ID: ${docRef.id}`);
+      debugInfo.textContent = `✅ Gasto adicionado! ID: ${docRef.id}`;
+      alert(`Gasto adicionado em ${mes}! ID: ${docRef.id}\nVerifique no Firebase Console.`);
 
       // Limpar campos
       document.getElementById("nome").value = "";
       document.getElementById("valor").value = "";
+      document.getElementById("categoria").value = "";
+      document.getElementById("tipo").value = "";
       
       // Atualizar lista
       atualizarLista();
 
     } catch (error) {
-      console.error("Erro detalhado:", error);
-      alert(`Erro ao adicionar gasto: ${error.message}`);
+      console.error("Erro detalhado:", {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      debugInfo.innerHTML = `❌ Erro grave: ${error.message}<br>Verifique o console`;
+      alert(`Erro ao adicionar gasto: ${error.message}\nVerifique o console para detalhes.`);
     }
   }
 
@@ -347,6 +406,7 @@
       const mesSelecionado = document.getElementById("mesFiltro").value;
       
       lista.innerHTML = '<div class="loading">Carregando...</div>';
+      debugInfo.textContent = `Buscando gastos para: ${mesSelecionado}...`;
       
       let totalFixo = 0, totalVariavel = 0;
       let html = "";
@@ -366,6 +426,7 @@
       if (querySnapshot.empty) {
         lista.innerHTML = '<div class="loading">Nenhum gasto encontrado.</div>';
         document.getElementById("resumo").innerHTML = "<p>Nenhum gasto registrado para este período.</p>";
+        debugInfo.textContent = "ℹ️ Nenhum gasto encontrado para o período selecionado";
         return;
       }
       
@@ -394,10 +455,13 @@
         <p><strong>Total Fixo:</strong> R$ ${totalFixo.toFixed(2)}</p>
         <p><strong>Total Variável:</strong> R$ ${totalVariavel.toFixed(2)}</p>
         <p><strong>Total Geral:</strong> R$ ${(totalFixo + totalVariavel).toFixed(2)}</p>`;
+      
+      debugInfo.textContent = `✅ ${querySnapshot.size} gastos carregados`;
         
     } catch (error) {
       console.error("Erro ao carregar gastos:", error);
       lista.innerHTML = '<div class="loading">Erro ao carregar os gastos.</div>';
+      debugInfo.innerHTML = `❌ Erro ao carregar gastos: ${error.message}`;
     }
   }
 
@@ -405,11 +469,14 @@
   window.excluirGasto = async (id) => {
     if (confirm("Tem certeza que deseja excluir este gasto?")) {
       try {
+        debugInfo.textContent = "Excluindo gasto...";
         await deleteDoc(doc(db, "gastos", id));
+        debugInfo.textContent = "✅ Gasto excluído com sucesso";
         atualizarLista();
       } catch (error) {
         console.error("Erro ao excluir gasto:", error);
         alert("Erro ao excluir o gasto.");
+        debugInfo.innerHTML = `❌ Erro ao excluir: ${error.message}`;
       }
     }
   };
@@ -418,6 +485,7 @@
   window.limparDados = async () => {
     if (confirm("⚠️ ATENÇÃO! Isso apagará TODOS os gastos permanentemente. Continuar?")) {
       try {
+        debugInfo.textContent = "Iniciando limpeza de dados...";
         const querySnapshot = await getDocs(collection(db, "gastos"));
         const deletePromises = [];
         
@@ -426,11 +494,13 @@
         });
         
         await Promise.all(deletePromises);
+        debugInfo.textContent = `✅ ${deletePromises.length} gastos removidos`;
         atualizarLista();
         alert("Todos os dados foram apagados com sucesso!");
       } catch (error) {
         console.error("Erro ao limpar dados:", error);
         alert("Erro ao limpar os dados.");
+        debugInfo.innerHTML = `❌ Erro na limpeza: ${error.message}`;
       }
     }
   };
@@ -480,8 +550,12 @@
     document.getElementById("mes").value = mesAtual;
     document.getElementById("mesFiltro").value = mesAtual;
     
-    // Testa a conexão e carrega os dados
-    testarConexaoFirestore();
+    // Verifica a conexão e a coleção
+    console.log("Firestore inicializado:", db);
+    debugInfo.textContent = "Aplicativo carregado. Verificando conexão...";
+    
+    // Testa a conexão e verifica a coleção
+    verificarColecao();
     atualizarLista();
   });
 </script>
