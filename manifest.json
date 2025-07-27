@@ -1,11 +1,11 @@
 {
   "name": "Controle de Gastos",
   "short_name": "Gastos",
-  "description": "App para controlar gastos mensais com Firebase",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#4CAF50",
   "theme_color": "#4CAF50",
+  "description": "Aplicativo para controle de gastos pessoais",
   "icons": [
     {
       "src": "icons/icon-192.png",
