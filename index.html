@@ -302,22 +302,21 @@
         valor,
         categoria,
         tipo,
-        mes,
+        mes,  // Usa o mês selecionado no formulário
         data: new Date().toISOString()
       });
 
-      // Limpa os campos
+      // Limpa os campos (exceto o mês)
       document.getElementById("nome").value = "";
       document.getElementById("valor").value = "";
       document.getElementById("categoria").value = "";
       document.getElementById("tipo").value = "";
       
-      // Atualiza a lista
-      document.getElementById("mesFiltro").value = mes;
+      // Atualiza a lista mantendo o filtro atual
       atualizarLista();
       
       // Feedback visual
-      alert("Gasto adicionado com sucesso!");
+      alert(`Gasto de ${mes} adicionado com sucesso!`);
       
     } catch (error) {
       console.error("Erro ao adicionar gasto:", error);
@@ -455,13 +454,19 @@
     }
   };
 
-  // Inicializa a lista quando a página carrega
+  // Inicialização - CORRIGIDA para não interferir na seleção de mês
   document.addEventListener("DOMContentLoaded", () => {
-    // Define o mês atual como padrão
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
                   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     const mesAtual = meses[new Date().getMonth()];
+    
+    // Define o mês atual apenas como sugestão (remove o selected dos options primeiro)
+    document.querySelectorAll('#mes option').forEach(option => {
+      option.removeAttribute('selected');
+    });
     document.getElementById("mes").value = mesAtual;
+    
+    // Define o filtro para o mês atual
     document.getElementById("mesFiltro").value = mesAtual;
     
     atualizarLista();
