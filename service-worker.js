@@ -15,13 +15,19 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(ASSETS);
-      })
-      .then(() => self.skipWaiting())
-  );
+  caches.open(CACHE_NAME)
+    .then((cache) => {
+      return Promise.all(
+        ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn(`[Service Worker] Falhou ao adicionar ${url}:`, err);
+          })
+        )
+      );
+    })
+    .then(() => self.skipWaiting())
+);
+
 });
 
 // Ativação do Service Worker
